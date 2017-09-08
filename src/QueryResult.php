@@ -112,19 +112,26 @@ final class QueryResult
     /**
      * @return \Generator
      */
-    public function yieldData(): \Generator
+    public function yieldData($asArray = false): \Generator
     {
         if (!count($this->data)) {
             yield;
         }
         $column = $this->getColumns();
+        $columnNames = array_map(function ($item) {
+            return $item->getName();
+        }, $column);
         $columnCount = count($column);
         foreach ($this->data as $data) {
-            $fixData = new FixData();
-            for ($i = 0; $i < $columnCount; $i++) {
-                $fixData->add($column[$i]->getName(), $data[$i]);
+            if ($asArray) {
+                yield array_combine($columnNames, $data);
+            } else {
+                $fixData = new FixData();
+                for ($i = 0; $i < $columnCount; $i++) {
+                    $fixData->add($column[$i]->getName(), $data[$i]);
+                }
+                yield $fixData;
             }
-            yield $fixData;
         }
     }
 
